@@ -8,6 +8,12 @@ import { Ship } from '../entities/ship.entity';
 import { Position } from '../entities/position.entity';
 import { Repository } from 'typeorm';
 import { CreatePositionDto } from '../dto/create-position.dto';
+import { ShipStatus } from '../enums/ship-status.enum';
+import {
+  COLLISION_DISTANCE,
+  LOOKAHEAD_TIME,
+  WARNING_DISTANCE,
+} from '../consts/ships.consts';
 
 @Injectable()
 export class PositionsService {
@@ -73,29 +79,54 @@ export class PositionsService {
     currentShipId: string,
     dto: CreatePositionDto,
     speed: number,
-  ): Promise<'green' | 'yellow' | 'red'> {
+  ): Promise<ShipStatus> {
     const positions = await this.positionRepo
       .createQueryBuilder('position')
       .innerJoinAndSelect('position.ship', 'ship')
       .where('ship.id != :id', { id: currentShipId })
       .getMany();
 
+    const lookaheadTime = LOOKAHEAD_TIME;
+
     for (const pos of positions) {
       const dt = dto.time - pos.time;
-      if (dt < 0) continue;
+      if (dt < 0) continue; // Skip any past positions
 
+      // Calculate the current distance between positions
       const dx = dto.x - pos.x;
       const dy = dto.y - pos.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      const dist = Math.sqrt(dx * dx + dy * dy); // Current distance
 
-      if (dist <= 1) {
-        return 'red';
-      } else if (dist <= 2) {
-        return 'yellow';
+      // Predict future positions based on speed and time
+      const futurePosX =
+        pos.x + Math.cos(Math.atan2(dy, dx)) * speed * lookaheadTime;
+      const futurePosY =
+        pos.y + Math.sin(Math.atan2(dy, dx)) * speed * lookaheadTime;
+
+      // Calculate the future distance between current ship and future position of the other ship
+      const futureDx =
+        dto.x +
+        Math.cos(Math.atan2(dy, dx)) * speed * lookaheadTime -
+        futurePosX;
+      const futureDy =
+        dto.y +
+        Math.sin(Math.atan2(dy, dx)) * speed * lookaheadTime -
+        futurePosY;
+      const futureDist = Math.sqrt(futureDx * futureDx + futureDy * futureDy); // Future distance
+
+      // If the ships are already close (current distance), return Red status
+      if (dist <= COLLISION_DISTANCE) {
+        return ShipStatus.Red;
+      }
+
+      if (futureDist <= COLLISION_DISTANCE) {
+        return ShipStatus.Red;
+      } else if (futureDist <= WARNING_DISTANCE) {
+        return ShipStatus.Yellow;
       }
     }
 
-    return 'green';
+    return ShipStatus.Green;
   }
 
   async getAllShipsStatus() {
@@ -107,7 +138,7 @@ export class PositionsService {
         return {
           id: ship.id,
           last_time: last?.time ?? null,
-          last_status: last?.status ?? 'green',
+          last_status: last?.status ?? ShipStatus.Green,
           last_speed: last?.speed ?? 0,
           last_position: last ? { x: last.x, y: last.y } : { x: 0, y: 0 },
         };

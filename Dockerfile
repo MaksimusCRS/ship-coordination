@@ -1,15 +1,26 @@
-FROM node:18
+# Use Node.js LTS version
+FROM node:20
 
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
+# Install NestJS CLI globally
+RUN npm install -g @nestjs/cli
+
+# Copy application source
 COPY . .
 
-# Add crypto polyfill for ESM (optional step if needed)
-ENV NODE_OPTIONS=--experimental-global-webcrypto
-
+# Build the application
 RUN npm run build
 
-CMD ["node", "dist/main"]
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Start the application
+CMD ["npm", "run", "start:prod"]

@@ -48,8 +48,7 @@ http://localhost:8080/api
 🧪 Run Tests
 Make sure the system is running (docker compose up), then run tests:
 
-docker compose exec ship-coordination-api npm run test:e2e
-This will run all E2E tests inside the Docker container.
+
 
 ⚙️ Environment Variables
 You can customize settings in .env:
