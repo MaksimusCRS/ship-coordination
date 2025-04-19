@@ -11,7 +11,7 @@ import { ShipsModule } from './ships/ships.module';
         type: 'postgres',
         url: process.env.DATABASE_URL,
         autoLoadEntities: true,
-        synchronize: true, // set false in prod
+        synchronize: true,
       }),
     }),
     ShipsModule,

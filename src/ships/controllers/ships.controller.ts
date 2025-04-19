@@ -1,6 +1,6 @@
 import { Controller, Post, Param, Body, Get } from '@nestjs/common';
-import { PositionsService } from './positions.service';
-import { CreatePositionDto } from './dto/create-position.dto';
+import { CreatePositionDto } from '../dto/create-position.dto';
+import { PositionsService } from '../services/positions.service';
 
 @Controller('/v1/api/ships')
 export class ShipsController {

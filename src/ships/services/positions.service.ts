@@ -4,10 +4,10 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Ship } from './entities/ship.entity';
-import { Position } from './entities/position.entity';
+import { Ship } from '../entities/ship.entity';
+import { Position } from '../entities/position.entity';
 import { Repository } from 'typeorm';
-import { CreatePositionDto } from './dto/create-position.dto';
+import { CreatePositionDto } from '../dto/create-position.dto';
 
 @Injectable()
 export class PositionsService {

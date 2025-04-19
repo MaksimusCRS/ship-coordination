@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Ship } from './entities/ship.entity';
-import { Position } from './entities/position.entity';
-import { CreatePositionDto } from './dto/create-position.dto';
+import { Ship } from '../entities/ship.entity';
+import { Position } from '../entities/position.entity';
+import { CreatePositionDto } from '../dto/create-position.dto';
 
 @Injectable()
 export class ShipsService {
